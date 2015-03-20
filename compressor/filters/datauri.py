@@ -21,6 +21,7 @@ class DataUriFilter(FilterBase):
     def input(self, filename=None, **kwargs):
         if not filename or not filename.startswith(settings.COMPRESS_ROOT):
             return self.content
+        self.base_path = os.path.dirname(filename)
         output = self.content
         for url_pattern in self.url_patterns:
             output = url_pattern.sub(self.data_uri_converter, output)
@@ -32,8 +33,12 @@ class DataUriFilter(FilterBase):
             url = url.split("?")[0]
         if "#" in url:
             url = url.split("#")[0]
-        return os.path.join(
-            settings.COMPRESS_ROOT, url[len(settings.COMPRESS_URL):])
+        if os.path.isabs(url):
+            return os.path.join(
+                settings.COMPRESS_ROOT, url[len(settings.COMPRESS_URL):])
+        else:
+            return os.path.normpath(os.path.join(
+                self.base_path, settings.COMPRESS_OUTPUT_DIR, url))
 
     def data_uri_converter(self, matchobj):
         url = matchobj.group(1).strip(' \'"')
