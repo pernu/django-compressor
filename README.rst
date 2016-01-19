@@ -1,18 +1,21 @@
 Django Compressor
 =================
 
-.. image:: https://coveralls.io/repos/django-compressor/django-compressor/badge.png?branch=develop 
-  :target: https://coveralls.io/r/django-compressor/django-compressor?branch=develop
+.. image:: http://codecov.io/github/django-compressor/django-compressor/coverage.svg?branch=develop
+    :target: http://codecov.io/github/django-compressor/django-compressor?branch=develop
 
-.. image:: https://pypip.in/v/django_compressor/badge.png
+.. image:: https://pypip.in/v/django_compressor/badge.svg
         :target: https://pypi.python.org/pypi/django_compressor
 
-.. image:: https://pypip.in/d/django_compressor/badge.png
+.. image:: https://pypip.in/d/django_compressor/badge.svg
         :target: https://pypi.python.org/pypi/django_compressor
 
-.. image:: https://secure.travis-ci.org/django-compressor/django-compressor.png?branch=develop
+.. image:: https://secure.travis-ci.org/django-compressor/django-compressor.svg?branch=develop
     :alt: Build Status
     :target: http://travis-ci.org/django-compressor/django-compressor
+
+.. image:: https://caniusepython3.com/project/django_compressor.svg
+    :target: https://caniusepython3.com/project/django_compressor
 
 Django Compressor combines and compresses linked and inline Javascript
 or CSS in a Django template into cacheable static files by using the
@@ -47,10 +50,10 @@ default. As an alternative Django Compressor provides a BeautifulSoup_ and a
 html5lib_ based parser, as well as an abstract base class that makes it easy to
 write a custom parser.
 
-Django Compressor also comes with built-in support for `CSS Tidy`_,
+Django Compressor also comes with built-in support for
 `YUI CSS and JS`_ compressor, `yUglify CSS and JS`_ compressor, the Google's
 `Closure Compiler`_, a Python port of Douglas Crockford's JSmin_, a Python port
-of the YUI CSS Compressor cssmin_ and a filter to convert (some) images into
+of the YUI CSS Compressor csscompressor_ and a filter to convert (some) images into
 `data URIs`_.
 
 If your setup requires a different compressor or other post-processing
@@ -68,14 +71,12 @@ The in-development version of Django Compressor can be installed with
 
 .. _BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
 .. _lxml: http://lxml.de/
-.. _html5lib: http://code.google.com/p/html5lib/
-.. _CSS Tidy: http://csstidy.sourceforge.net/
+.. _html5lib: https://github.com/html5lib/html5lib-python
 .. _YUI CSS and JS: http://developer.yahoo.com/yui/compressor/
 .. _yUglify CSS and JS: https://github.com/yui/yuglify
 .. _Closure Compiler: http://code.google.com/closure/compiler/
 .. _JSMin: http://www.crockford.com/javascript/jsmin.html
-.. _cssmin: https://github.com/zacharyvoase/cssmin
+.. _csscompressor: https://github.com/sprymix/csscompressor
 .. _data URIs: http://en.wikipedia.org/wiki/Data_URI_scheme
 .. _django-compressor.readthedocs.org: http://django-compressor.readthedocs.org/en/latest/
 .. _github.com/django-compressor/django-compressor: https://github.com/django-compressor/django-compressor
-

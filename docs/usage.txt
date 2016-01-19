@@ -48,7 +48,7 @@ Which would be rendered something like:
 
 .. note::
 
-    Remember that django-compressor will try to :ref:`group ouputs by media <css_notes>`.
+    Remember that django-compressor will try to :ref:`group outputs by media <css_notes>`.
 
 Linked files **must** be accessible via
 :attr:`~django.conf.settings.COMPRESS_URL`.
@@ -105,7 +105,7 @@ of that particular compress tag.  This is then added to the context so you can
 access it in the `post_compress signal <signals>`.
 
 .. _memcached: http://memcached.org/
-.. _caching documentation: http://docs.djangoproject.com/en/1.2/topics/cache/#memcached
+.. _caching documentation: https://docs.djangoproject.com/en/1.8/topics/cache/#memcached
 
 .. _pre-compression:
 
@@ -153,7 +153,7 @@ the commonly used setting to refer to saved files ``STATIC_URL``.
 
 The result of running the ``compress`` management command will be cached
 in a file called ``manifest.json`` using the :attr:`configured storage
-<django.conf.settings.COMPRESS_STORAGE>` to be able to be transfered from your developement
+<django.conf.settings.COMPRESS_STORAGE>` to be able to be transferred from your development
 computer to the server easily.
 
 .. _TEMPLATE_LOADERS: http://docs.djangoproject.com/en/dev/ref/settings/#template-loaders

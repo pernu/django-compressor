@@ -1,13 +1,11 @@
 from __future__ import absolute_import
-import io
 from copy import copy
 
 from django import template
-from django.conf import settings
-from django.template import Template
 from django.template import Context
 from django.template.base import Node, VariableNode, TextNode, NodeList
 from django.template.defaulttags import IfNode
+from django.template.loader import get_template
 from django.template.loader_tags import ExtendsNode, BlockNode, BlockContext
 
 
@@ -15,7 +13,7 @@ from compressor.exceptions import TemplateSyntaxError, TemplateDoesNotExist
 from compressor.templatetags.compress import CompressorNode
 
 
-def handle_extendsnode(extendsnode, block_context=None):
+def handle_extendsnode(extendsnode, block_context=None, original=None):
     """Create a copy of Node tree of a derived template replacing
     all blocks tags with the nodes of appropriate blocks.
     Also handles {{ block.super }} tags.
@@ -26,7 +24,13 @@ def handle_extendsnode(extendsnode, block_context=None):
                   extendsnode.nodelist.get_nodes_by_type(BlockNode))
     block_context.add_blocks(blocks)
 
-    context = Context(settings.COMPRESS_OFFLINE_CONTEXT)
+    # Note: we pass an empty context when we find the parent, this breaks
+    # inheritance using variables ({% extends template_var %}) but a refactor
+    # will be needed to support that use-case with multiple offline contexts.
+    context = Context()
+    if original is not None:
+        context.template = original
+
     compiled_parent = extendsnode.get_parent(context)
     parent_nodelist = compiled_parent.nodelist
     # If the parent template has an ExtendsNode it is not the root.
@@ -34,7 +38,7 @@ def handle_extendsnode(extendsnode, block_context=None):
         # The ExtendsNode has to be the first non-text node.
         if not isinstance(node, TextNode):
             if isinstance(node, ExtendsNode):
-                return handle_extendsnode(node, block_context)
+                return handle_extendsnode(node, block_context, original)
             break
     # Add blocks of the root template to block context.
     blocks = dict((n.name, n) for n in
@@ -55,6 +59,8 @@ def remove_block_nodes(nodelist, block_stack, block_context):
                 if not block_stack:
                     continue
                 node = block_context.get_block(block_stack[-1].name)
+                if not node:
+                    continue
         if isinstance(node, BlockNode):
             expanded_block = expand_blocknode(node, block_stack, block_context)
             new_nodelist.extend(expanded_block)
@@ -93,13 +99,12 @@ class DjangoParser(object):
         self.charset = charset
 
     def parse(self, template_name):
-        with io.open(template_name, mode='rb') as file:
-            try:
-                return Template(file.read().decode(self.charset))
-            except template.TemplateSyntaxError as e:
-                raise TemplateSyntaxError(str(e))
-            except template.TemplateDoesNotExist as e:
-                raise TemplateDoesNotExist(str(e))
+        try:
+            return get_template(template_name).template
+        except template.TemplateSyntaxError as e:
+            raise TemplateSyntaxError(str(e))
+        except template.TemplateDoesNotExist as e:
+            raise TemplateDoesNotExist(str(e))
 
     def process_template(self, template, context):
         return True
@@ -111,15 +116,16 @@ class DjangoParser(object):
         pass
 
     def render_nodelist(self, template, context, node):
+        context.template = template
         return node.nodelist.render(context)
 
     def render_node(self, template, context, node):
         return node.render(context, forced=True)
 
-    def get_nodelist(self, node):
+    def get_nodelist(self, node, original=None):
         if isinstance(node, ExtendsNode):
             try:
-                return handle_extendsnode(node)
+                return handle_extendsnode(node, block_context=None, original=original)
             except template.TemplateSyntaxError as e:
                 raise TemplateSyntaxError(str(e))
             except template.TemplateDoesNotExist as e:
@@ -134,10 +140,12 @@ class DjangoParser(object):
             nodelist = getattr(node, 'nodelist', [])
         return nodelist
 
-    def walk_nodes(self, node):
-        for node in self.get_nodelist(node):
+    def walk_nodes(self, node, original=None):
+        if original is None:
+            original = node
+        for node in self.get_nodelist(node, original):
             if isinstance(node, CompressorNode) and node.is_offline_compression_enabled(forced=True):
                 yield node
             else:
-                for node in self.walk_nodes(node):
+                for node in self.walk_nodes(node, original):
                     yield node
